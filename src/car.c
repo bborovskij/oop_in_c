@@ -16,7 +16,7 @@ void car_ctor(car* self) {
 }
 
 static void car_init(vehicle* self, char *fuel, char *name, int wheels, int seats, int doors) {
-    /* Always call parent's init() first to be able to use inherited attributes and methods. */
+    /* Always call parent's init() first. */
     ((car *)self)->super.init(self, fuel, name, wheels, seats);
 
     /* car specific attribute. */

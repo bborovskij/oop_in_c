@@ -10,6 +10,9 @@ typedef struct car {
     /* Number of doors my car has */
     int doors;
 
+    /*
+    Override vehicle init().
+    */
     void (*init)(vehicle* self, char *fuel, char *name, int wheels, int seats, int doors);
     /* 
     Since we're overriding init() with new arguments for new attributes, parent's init() 
@@ -21,6 +24,9 @@ typedef struct car {
     void (*open_door)(vehicle*, int);
 } car;
 
+/**
+ * Construct car object methods.
+ */
 void car_ctor(car* self);
 
 #endif //UNTITLED_CAR_H

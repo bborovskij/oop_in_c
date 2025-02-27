@@ -17,7 +17,7 @@ typedef struct vehicle {
     /* gasoline or diesel. */
     char m_fuel[16];
 
-    /* car or bike. Just a name for logging. */
+    /* Just a name for logging. */
     char m_name[16];
 
     /* how many wheels my vehicle has. */
@@ -26,6 +26,7 @@ typedef struct vehicle {
     /* how many seats my vehicle has. */
     int m_seats;
 
+    /* Initiate object's attributes. */
     void (*init)(struct vehicle* self, char *fuel, char *name, int wheels, int seats);
     /* 
     Clear all the instance-related data. 
@@ -51,6 +52,9 @@ typedef struct vehicle {
     void (*log)(struct vehicle *self, const char * restrict fmt, ...);
 } vehicle;
 
+/**
+ * Construct vehicle object methods.
+ */
 void vehicle_ctor(vehicle* self);
 
 #endif //UNTITLED_VEHICLE_H
