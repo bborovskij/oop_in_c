@@ -1,11 +1,11 @@
 # OOP in C: Vehicle, Car, and Bike Classes
 
 ## Overview
-This project demonstrates object-oriented programming (OOP) principles implemented in **C**. It introduces a **Vehicle** base class with two derived classes: **Car** and **Bike**. The implementation adheres to the fundamental OOP principles of **encapsulation, inheritance, and polymorphism** while avoiding dynamic memory allocation for simplicity.
+This project demonstrates object-oriented programming (OOP) principles implemented in **C**. It introduces a **Vehicle** base class with three derived classes: **Car**, **Bike** and **BMW**. The implementation follows the fundamental OOP principles of **encapsulation, inheritance, and polymorphism** while avoiding dynamic memory allocation for instances.
 
 ## Features
 - **Encapsulation**: Grouping attributes and methods inside objects.
-- **Inheritance**: `Car` and `Bike` inherit from `Vehicle`.
+- **Inheritance**: `Car` and `Bike` inherit from `Vehicle`. `BMW` inherits from `Car`.
 - **Polymorphism**: Methods in derived classes override base class methods.
 - **Static Allocation**: No dynamic memory allocation.
 
@@ -21,7 +21,9 @@ This project demonstrates object-oriented programming (OOP) principles implement
 │   ├── vehicle.h
 │   ├── car.h
 │   ├── bike.h
+│   ├── bmw.h
 │
+├── main.c
 ├── CMakeLists.txt
 └── README.md
 ```
@@ -33,7 +35,7 @@ git clone https://github.com/bborovskij/oop_in_c.git
 cd oop_in_c
 mkdir build
 cd build
-cmake ..
+cmake .. # 'cmake -DCMAKE_BUILD_TYPE=Debug ..' if gdb needed
 make
 ```
 

@@ -1,44 +1,42 @@
 #include "car.h"
 #include "vehicle.h"
+#include "macros.h"
 
-void car_init(struct vehicle* self, char *fuel, char *name, int wheels, int seats, int doors) {
+static void car_init(vehicle* self, char *fuel, char *name, int wheels, int seats, int doors);
+static void car_deinit(vehicle* self);
+static void car_open_door(vehicle* self, int num);
+
+
+void car_ctor(car* self) {
+    VEHICLE_CTOR(&(self->super));
+    self->init = car_init;
+    self->deinit = car_deinit;
+    self->open_door = car_open_door;
+
+}
+
+static void car_init(vehicle* self, char *fuel, char *name, int wheels, int seats, int doors) {
     /* Always call parent's init() first to be able to use inherited attributes and methods. */
-    vehicle_init(self, fuel, name, wheels, seats);
-
-    /* 
-    We'll be passing 'struct car*' object as self so the attributes after 
-    'struct vehicle super;' from 'struct car' should be accessible. We'll see an example in main.c. */
-    struct car *this_car = (struct car *)self;
+    ((car *)self)->super.init(self, fuel, name, wheels, seats);
 
     /* car specific attribute. */
-    this_car->doors = doors;
-
-    /* car specific methods. */
-    this_car->open_door = car_open_door;
-    this_car->deinit = car_deinit;
-    this_car->init = car_init;
+    ((car *)self)->doors = doors;
 
     self->log(self, INFO "Initiated");
 }
 
-void car_deinit(struct vehicle* self) {
+static void car_deinit(vehicle* self) {
     self->log(self, INFO "De-Initiated");
-    ((struct car *)self)->doors = 0;
+    ((car *)self)->doors = 0;
 
     /* Always call parent's deinit() last so that it cleans up inherited attributes and methods. */
-    vehicle_deinit(self);
+    ((car *)self)->super.deinit(self);
 }
 
-void car_open_door(struct vehicle* self, int num) {
-    /* 
-    We'll be passing 'struct car*' object as self so the car specific methods 
-    should be accessible. 
-    */
-    struct car *this_car = (struct car *)self;
-
+static void car_open_door(vehicle* self, int num) {
     /* Note the access to car specific attribute 'door'. */
-    if ((num < 1) || (num > this_car->doors)) {
-        self->log(self, ERROR "This car only has %d doors, not %d", this_car->doors, num);
+    if ((num < 1) || (num > ((car *)self)->doors)) {
+        self->log(self, ERROR "This car only has %d doors, not %d", ((car *)self)->doors, num);
     } else {
         self->log(self, INFO "Opening door num %d", num);
     }

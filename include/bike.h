@@ -3,14 +3,13 @@
 
 #include "vehicle.h"
 
-struct bike {
+typedef struct bike {
     /* Just the parent class. */
-    struct vehicle super;
+    vehicle super;
 
-    /* init() with fewer arguments than the parent class has. */
-    void (*init)(struct vehicle*);
-};
+    void (*init)(vehicle *);
+} bike;
 
-void bike_init(struct vehicle* self);
+void bike_ctor(bike* self);
 
 #endif //UNTITLED_BIKE_H
