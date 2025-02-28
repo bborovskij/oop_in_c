@@ -2,42 +2,56 @@
 #include "vehicle.h"
 #include "macros.h"
 
-static void car_init(vehicle* self, char *fuel, char *name, int wheels, int seats, int doors);
-static void car_deinit(vehicle* self);
-static void car_open_door(vehicle* self, int num);
 
+/**
+ * Specify one overrided or new methods here.
+ */
+static struct car_vtab c_vtab = {
+    .init = car_init, // for derived class to initialize car as parent (bmw will derive from car and will call it)
+    .deinit = car_deinit,
+    .open_door = car_open_door,
+};
 
-void car_ctor(car* self) {
-    VEHICLE_CTOR(&(self->super));
-    self->init = car_init;
-    self->deinit = car_deinit;
-    self->open_door = car_open_door;
-
-}
-
-static void car_init(vehicle* self, char *fuel, char *name, int wheels, int seats, int doors) {
+void car_init(car* self, char *fuel, char *name, int wheels, int seats, int doors) {
+    self->vtab = &c_vtab;
     /* Always call parent's init() first. */
-    ((car *)self)->super.init(self, fuel, name, wheels, seats);
-
+    /*
+    Using VEHICLE_INIT_PARENT() is not mandatory.
+    I prefer using VEHICLE_INIT_PARENT() macro to initialize parent class of derived object and 
+    VEHICLE_CALL() macro for any other method call.
+     */
+    // vehicle_init(&(self->super), fuel, name, wheels, seats);
+    VEHICLE_INIT_PARENT(self, fuel, name, wheels, seats);
     /* car specific attribute. */
-    ((car *)self)->doors = doors;
-
-    self->log(self, INFO "Initiated");
+    self->doors = doors;
+    // ((vehicle*)self)->vtab->log((vehicle*)self, INFO "Initiated");
+    VEHICLE_CALL(self, vehicle, log, INFO "Initiated");
 }
 
-static void car_deinit(vehicle* self) {
-    self->log(self, INFO "De-Initiated");
-    ((car *)self)->doors = 0;
-
-    /* Always call parent's deinit() last so that it cleans up inherited attributes and methods. */
-    ((car *)self)->super.deinit(self);
+void car_deinit(car* self) {
+    // ((vehicle*)self)->vtab->start((vehicle*)self);
+    VEHICLE_CALL(self, vehicle, log, INFO "De-Initiated");
+    /* Always call parent's deinit(). */
+    // ((vehicle*)self)->vtab->deinit((vehicle*)self);
+    VEHICLE_CALL(self, vehicle, deinit);
+    self->doors = 0;
+    self->vtab = NULL;
 }
 
-static void car_open_door(vehicle* self, int num) {
+void car_open_door(car* self, int num) {
     /* Note the access to car specific attribute 'door'. */
     if ((num < 1) || (num > ((car *)self)->doors)) {
-        self->log(self, ERROR "This car only has %d doors, not %d", ((car *)self)->doors, num);
+        VEHICLE_CALL(self, vehicle, log, ERROR "This car only has %d doors, not %d", ((car *)self)->doors, num);
     } else {
-        self->log(self, INFO "Opening door num %d", num);
+        VEHICLE_CALL(self, vehicle, log, INFO "Opening door num %d", num);
     }
+}
+
+void car_stop(car* self) {
+    // ((vehicle*)self)->vtab->start((vehicle*)self);
+    VEHICLE_CALL(self, vehicle, start);
+}
+
+void car_start(car* self) {
+    VEHICLE_CALL(self, vehicle, stop);
 }

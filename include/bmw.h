@@ -5,20 +5,26 @@
 #include "car.h"
 #include "vehicle.h"
 
-typedef struct bmw {
-    car super;
+typedef struct bmw bmw;
+typedef struct bmw_vtab bmw_vtab;
 
+struct bmw_vtab {
     /*
     Override Car's init.
     */
-    void (*init)(vehicle* self);
+    void (*init)(bmw* self);
     /* Start and switch to sport mode. */
-    void (*start)(vehicle*, bool);
-} bmw;
+    void (*start)(bmw*, bool);
+};
 
-/**
- * Construct BMW object methods.
- */
-void bmw_ctor(bmw *);
+struct bmw {
+    car super;
+    bmw_vtab *vtab;
+};
+
+void bmw_init(bmw* self);
+void bmw_start(bmw* self, bool in_sport_mode);
+void bmw_stop(bmw* self);
+void bmw_deinit(bmw* self);
 
 #endif //UNTITLED_BMW_H

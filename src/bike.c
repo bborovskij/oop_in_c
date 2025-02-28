@@ -2,19 +2,32 @@
 #include "vehicle.h"
 #include "macros.h"
 
-static void bike_init(vehicle* self);
+/**
+ * Specify one overrided or new methods here.
+ */
+static bike_vtab b_vtab = {
+    .init = bike_init,
+};
 
-void bike_ctor(bike* self) {
-    VEHICLE_CTOR(&(self->super));
-
-    self->init = bike_init;
-}
-
-static void bike_init(vehicle* self) {
+void bike_init(bike* self) {
     /* 
     Always call parent's init() first to be able to use inherited attributes and methods. 
     Note that we pass default for bike values to 'fuel', 'm_wheels' and 'm_seats'.
     */
-    ((bike *)self)->super.init(self, "gasoline", "my bike", 2, 2);
-    self->log(self, INFO "Initiated");
+    self->vtab = &b_vtab;
+    VEHICLE_INIT_PARENT(self, "gasoline", "my bike", 2, 2);
+    VEHICLE_CALL(self, vehicle, log, INFO "Initiated");
+}
+
+void bike_start(bike* self) {
+    VEHICLE_CALL(self, vehicle, start);
+}
+
+void bike_stop(bike* self) {
+    VEHICLE_CALL(self, vehicle, stop);
+}
+
+void bike_deinit(bike* self) {
+    VEHICLE_CALL(self, vehicle, deinit);
+    self->vtab = NULL;
 }

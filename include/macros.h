@@ -6,27 +6,28 @@
 #include "bmw.h"
 #include "vehicle.h"
 
-/*
-Use VEHICLE_CALL() to call any object's method:
-- obj:                     variable holding object instance
-- instance_or_parent_type: we will look for `method_name` from this type. If `obj` overrides 
-  `method_name`, use instance type here. If it doesn't, use the type of the closest parent that has 
-  `method_name`.
-- method_name:             name of the method to call.
-- ... :                    arguments (apart from `self`) the method has.
-*/
+/**
+ * Use this macros to conveniently call other methods from th object.
+ * Where:
+ * - obj:                     pointer to derived instance
+ * - instance_or_parent_type: current or any parent type that has `method_name` object in its VTable.
+ *                            Can be used to call parent or grandparent mathod.
+ * - method_name            : Method name to call.
+ * - ...                    : Any `method_name` arguments.
+ */
 #define VEHICLE_CALL(obj, instance_or_parent_type, method_name, ...) \
-    ((instance_or_parent_type*)(obj))->method_name((vehicle *)(obj), ##__VA_ARGS__)
+    ((instance_or_parent_type*)(obj))->vtab->method_name((instance_or_parent_type *)(obj), ##__VA_ARGS__)
 
-/*
-Use VEHICLE_CTOR() to call specific to each object consturtor. Constructor is selected based on the object type.
-*/
-#define VEHICLE_CTOR(obj) \
-    _Generic((obj), \
-        car*: car_ctor, \
-        bike*: bike_ctor, \
-        bmw*: bmw_ctor, \
-        vehicle*: vehicle_ctor \
-    )(obj)
+
+/**
+ * Initialize parent of the derived object.
+ */
+#define VEHICLE_INIT_PARENT(obj, ...) \
+    _Generic(((obj)->super), \
+        car: car_init, \
+        bike: bike_init, \
+        bmw: bmw_init, \
+        vehicle: vehicle_init \
+    )(&((obj)->super), ##__VA_ARGS__)
 
 #endif //UNTITLED_MACROS_H

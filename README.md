@@ -55,6 +55,8 @@ The **Vehicle** class encapsulates common functionality:
 - **Attributes**: Fuel type, name, number of wheels, and seats.
 - **Methods**: `init()`, `deinit()`, `start()`, `stop()`, and `log()`.
 - Maintains an internal state variable `_engine_started`.
+- Uses virtual method table per object, but in our case, we only store overrided or new methods in object VTable.
+- for convenience, use macros to initialize parent object and call any (local or parent) object methods.
 
 ### **Derived Class: Car**
 Additional attributes and methods:
@@ -73,16 +75,9 @@ A simplified derived class:
 - Inherits most behavior from `Car`.
 
 ## Instantiate and use object
-1. Call object constructor to construct object methods
-- Can be called directly like `car_ctor(&instance)`, `bike_ctor(&instance)` or via a macro like `VEHICLE_CTOR(&instance)`
-2. Initialize object by calling `init()` method from the object. Use `VEHICLE_CALL()` macros to call any object's method
-  like `VEHICLE_CALL(&my_car, car, init, "diesel", "any car", 4, 5, 4);` where:
-- `&my_car` is a constructed instance of the object;
-- `car` is a type name of to call `init()` from. Since `car` overrides parent's `init()`, we're calling `init()` from `car` type. If `car` didn't override `init()` and used only parent's (`vehicle`) one, the second argument would be `vehicle` (like `VEHICLE_CALL(&my_car, vehicle, init, "diesel", "any car", 4, 5, 4);`);
-- `init` is the method to call.
-- `"diesel", "any car", 4, 5, 4` are `init()` arguments (see `car::init()` declaration)
-3. Call any object's method via `VEHICLE_CALL()` macros following the same logic as with `init()` like `VEHICLE_CALL(&instance, instance_or_parent_type_where_method_exists, method_name);`
-4. Clear instance data via `instance::deinit()` Using `VEHICLE_CALL()`.
+1. Call init(&obj) method to instantiate object.
+2. Call any object public methods available in respective header.
+2. Call deinit() method to clean up the instance.
 
 ## Example Usage in `main.c`
 ```c
@@ -92,48 +87,64 @@ A simplified derived class:
 #include "car.h"
 #include "bike.h"
 #include "bmw.h"
-#include "macros.h"
+#include <string.h>
 
 int main() {
-    car my_car;
-
-    /* Or just call directly instead of VEHICLE_CTOR() */
-    // car_ctor(&my_car);
-    VEHICLE_CTOR(&my_car);
-
-    VEHICLE_CALL(&my_car, car, init, "diesel", "any car", 4, 5, 4);
-    VEHICLE_CALL(&my_car, vehicle, start);
-    VEHICLE_CALL(&my_car, vehicle, stop);
-    VEHICLE_CALL(&my_car, car, open_door, 2);
-    VEHICLE_CALL(&my_car, car, deinit);
+    car my_car = {0};
+    car_init(&my_car, "diesel", "any car", 4, 5, 4);
+    car_start(&my_car);
+    car_stop(&my_car);
+    car_deinit(&my_car);
+    printf("car cleaned=%d\n", 0==memcmp(&my_car, &(car){0}, sizeof(my_car)));
 
     printf("\n");
 
-    bike my_bike;
-    /* Or just call directly instead of VEHICLE_CTOR() */
-    // bike_ctor(&my_car);
-    VEHICLE_CTOR(&my_bike);
-
-    VEHICLE_CALL(&my_bike, bike, init);
-    VEHICLE_CALL(&my_bike, vehicle, start);
-    VEHICLE_CALL(&my_bike, vehicle, stop);
-    VEHICLE_CALL(&my_bike, vehicle, deinit);
+    bike my_bike = {0};
+    bike_init(&my_bike);
+    bike_start(&my_bike);
+    bike_stop(&my_bike);
+    bike_deinit(&my_bike);
+    printf("bike cleaned=%d\n", 0==memcmp(&my_bike, &(bike){0}, sizeof(my_bike)));
 
     printf("\n");
 
-    bmw my_bmw;
-    /* Or just call directly instead of VEHICLE_CTOR() */
-    // bmw_ctor(&my_car);
-    VEHICLE_CTOR(&my_bmw);
-
-    VEHICLE_CALL(&my_bmw, bmw, init);
-    VEHICLE_CALL(&my_bmw, bmw, start, true);
-    VEHICLE_CALL(&my_bmw, vehicle, stop);
-    VEHICLE_CALL(&my_bmw, car, open_door, 1);
-    VEHICLE_CALL(&my_bmw, car, deinit);
+    bmw my_bmw = {0};
+    bmw_init(&my_bmw);
+    bmw_start(&my_bmw, true);
+    bmw_stop(&my_bmw);
+    bmw_deinit(&my_bmw);
+    printf("bmw cleaned=%d\n", 0==memcmp(&my_bmw, &(bmw){0}, sizeof(my_bmw)));
 
     return 0;
 }
+```
+
+Output:
+```text
+[any car] DEBUG: initiated vehicle running with diesel with 4 wheels and 5 seats
+[any car] INFO: Initiated
+[any car] DEBUG: vehicle running on diesel stopped
+[any car] DEBUG: vehicle running on diesel started
+[any car] INFO: De-Initiated
+[any car] DEBUG: de-initing vehicle
+car cleaned=1
+
+[my bike] DEBUG: initiated vehicle running with gasoline with 2 wheels and 2 seats
+[my bike] INFO: Initiated
+[my bike] DEBUG: vehicle running on gasoline started
+[my bike] DEBUG: vehicle running on gasoline stopped
+[my bike] DEBUG: de-initing vehicle
+bike cleaned=1
+
+[my bmw] DEBUG: initiated vehicle running with gasoline with 4 wheels and 2 seats
+[my bmw] INFO: Initiated
+[my bmw] INFO: Inited
+[my bmw] DEBUG: vehicle running on gasoline started
+[my bmw] INFO: Started in sport mode 1
+[my bmw] DEBUG: vehicle running on gasoline stopped
+[my bmw] INFO: De-Initiated
+[my bmw] DEBUG: de-initing vehicle
+bmw cleaned=1
 ```
 
 ---

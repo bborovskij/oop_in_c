@@ -3,19 +3,26 @@
 
 #include "vehicle.h"
 
-typedef struct bike {
-    /* Just the parent class. */
-    vehicle super;
+typedef struct bike bike;
+typedef struct bike_vtab bike_vtab;
 
+struct bike_vtab {
     /*
     Overriding init method.
     */
-    void (*init)(vehicle *);
-} bike;
+    void (*init)(bike *);
+};
 
-/**
- * Construct bike object methods.
- */
-void bike_ctor(bike* self);
+struct bike {
+    /* Just the parent class. */
+    vehicle super;
+    bike_vtab *vtab;
+};
+
+
+void bike_init(bike* self);
+void bike_start(bike* self);
+void bike_stop(bike* self);
+void bike_deinit(bike* self);
 
 #endif //UNTITLED_BIKE_H
